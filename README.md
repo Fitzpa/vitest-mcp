@@ -292,10 +292,10 @@ Or prepend your message with `vitest-mcp:` to ensure the tools are used:
 
 - **Node.js**: 18+ 🟢
 - **Vitest**: 0.34.0+ 🧪
-- **Coverage**: `@vitest/coverage-v8` (for coverage analysis) 📊
+- **Coverage**: `@vitest/coverage-istanbul` (for coverage analysis) 📊
 
 ```bash
-npm install --save-dev vitest@latest @vitest/coverage-v8@latest
+npm install --save-dev vitest@latest @vitest/coverage-istanbul@latest
 ```
 
 ## 🧰 Tools
@@ -426,7 +426,7 @@ export default defineConfig({
     reporters: ['json'],
     coverage: {
       enabled: true,
-      provider: 'v8',
+      provider: 'istanbul',
       reporter: ['json', 'html'],
     },
   },
@@ -444,7 +444,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     coverage: {
-      provider: 'v8',
+      provider: 'istanbul',
       reporter: ['text', 'json', 'html'],
       thresholds: {
         lines: 90,
@@ -523,7 +523,7 @@ VITEST_MCP_DEV_MODE=true
 
 **"Vitest not found"** - Install: `npm install --save-dev vitest@latest`
 
-**"Coverage provider not found"** - Install: `npm install --save-dev @vitest/coverage-v8@latest` 📊
+**"Coverage provider not found"** - Install: `npm install --save-dev @vitest/coverage-istanbul@latest` 📊
 
 **Hook issues** - Bypass with: `VITEST_HOOK_BYPASS=1 npm test`
 

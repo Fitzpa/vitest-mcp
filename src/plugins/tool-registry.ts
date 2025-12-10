@@ -149,7 +149,7 @@ export class ToolRegistry implements IToolRegistry {
       return "Operation timed out. Try running with a more specific target or increase the timeout in configuration.";
     }
     if (error.includes("coverage provider")) {
-      return "Coverage provider not found. Run: npm install --save-dev @vitest/coverage-v8";
+      return "Coverage provider not found. Run: npm install --save-dev @vitest/coverage-istanbul";
     }
     if (error.includes("test file") && error.includes("coverage")) {
       return "Coverage analysis should target source files, not test files. Specify the source file or directory being tested.";

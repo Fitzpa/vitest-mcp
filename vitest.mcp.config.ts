@@ -11,7 +11,7 @@ export default defineConfig({
     ],
     // No exclusions - MCP tools should access all tests
     coverage: {
-      provider: 'v8',
+      provider: 'istanbul',
       reporter: ['text', 'json', 'html'],
       reportsDirectory: './coverage',
       exclude: [
