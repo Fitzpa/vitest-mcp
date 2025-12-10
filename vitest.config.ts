@@ -25,6 +25,7 @@ export default defineConfig({
           name: 'browser',
           // Run browser tests in jsdom environment
           include: ['**/browser/**/*.test.ts', '**/browser/**/*.spec.ts'],
+          exclude: ['**/test-validation/**'],
           environment: 'jsdom',
         }
       }
