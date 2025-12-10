@@ -805,4 +805,73 @@ describe('analyze-coverage (core functionality)', () => {
       expect(spawnArgs.some(arg => arg.includes('**/*.stories.*'))).toBe(true);
     });
   });
+
+  describe('Timezone Configuration', () => {
+    it('should set TZ environment variable to America/Chicago', async () => {
+      // Arrange
+      const mockSpawn = vi.mocked(spawn).mockReturnValue(createSpawnMock());
+      vi.mocked(fileUtils.fileExists).mockResolvedValue(true);
+      vi.mocked(fileUtils.isDirectory).mockResolvedValue(false);
+      vi.mocked(versionChecker.checkAllVersions).mockResolvedValue({ 
+        errors: [], 
+        warnings: [],
+        coverageProvider: { version: '1.0.0' }
+      } as any);
+      vi.mocked(readFile).mockResolvedValue('');
+      
+      vi.mocked(coverageProcessor.processCoverageData).mockResolvedValue({
+        success: true,
+        coverage: { lines: 100, functions: 100, branches: 100, statements: 100 },
+        totals: { lines: 50, functions: 10, branches: 20 },
+        meetsThreshold: true,
+        command: 'npx vitest run --coverage ./test.ts',
+        duration: 1500
+      } as any);
+      
+      // Act
+      await handleAnalyzeCoverage({ target: './test.ts' });
+      
+      // Assert
+      expect(mockSpawn).toHaveBeenCalled();
+      const spawnCall = mockSpawn.mock.calls[0];
+      const options = spawnCall[2];
+      
+      expect(options.env).toBeDefined();
+      expect(options.env!.TZ).toBe('America/Chicago');
+    });
+
+    it('should include timezone setting with other environment variables', async () => {
+      // Arrange
+      const mockSpawn = vi.mocked(spawn).mockReturnValue(createSpawnMock());
+      vi.mocked(fileUtils.fileExists).mockResolvedValue(true);
+      vi.mocked(fileUtils.isDirectory).mockResolvedValue(false);
+      vi.mocked(versionChecker.checkAllVersions).mockResolvedValue({ 
+        errors: [], 
+        warnings: [],
+        coverageProvider: { version: '1.0.0' }
+      } as any);
+      vi.mocked(readFile).mockResolvedValue('');
+      
+      vi.mocked(coverageProcessor.processCoverageData).mockResolvedValue({
+        success: true,
+        coverage: { lines: 100, functions: 100, branches: 100, statements: 100 },
+        totals: { lines: 50, functions: 10, branches: 20 },
+        meetsThreshold: true,
+        command: 'npx vitest run --coverage ./test.ts',
+        duration: 1500
+      } as any);
+      
+      // Act
+      await handleAnalyzeCoverage({ target: './test.ts' });
+      
+      // Assert
+      const spawnCall = mockSpawn.mock.calls[0];
+      const options = spawnCall[2];
+      
+      // Verify timezone is set along with other required env vars
+      expect(options.env!.TZ).toBe('America/Chicago');
+      expect(options.env!.CI).toBe('true');
+      expect(options.env!.VITE_CJS_IGNORE_WARNING).toBe('true');
+    });
+  });
 });

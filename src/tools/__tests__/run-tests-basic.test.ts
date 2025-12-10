@@ -772,4 +772,62 @@ describe('run-tests (basic functionality)', () => {
       expect(context.estimatedTestCount).toBeUndefined();
     });
   });
+
+  describe('Timezone Configuration', () => {
+    beforeEach(() => {
+      const mockChild = createMockChildProcess();
+      vi.mocked(spawn).mockReturnValue(mockChild as any);
+      
+      vi.mocked(processTestResult).mockImplementation(async (result, format, _context) => ({
+        command: result.command,
+        success: true,
+        summary: { totalTests: 1, passed: 1, failed: 0 },
+        format: format,
+        executionTimeMs: 100
+      }));
+      
+      setTimeout(() => {
+        mockChild.stdout.emit('data', Buffer.from('{"numTotalTests":1,"numPassedTests":1,"numFailedTests":0,"success":true}'));
+        mockChild.emit('close', 0);
+      }, 10);
+    });
+
+    it('should set TZ environment variable to America/Chicago', async () => {
+      // Arrange
+      const args: RunTestsArgs = {
+        target: './test.ts'
+      };
+      
+      // Act
+      await handleRunTests(args);
+      
+      // Assert
+      expect(spawn).toHaveBeenCalled();
+      const spawnCall = vi.mocked(spawn).mock.calls[0];
+      const options = spawnCall[2];
+      
+      expect(options.env).toBeDefined();
+      expect(options.env!.TZ).toBe('America/Chicago');
+    });
+
+    it('should include timezone setting with other environment variables', async () => {
+      // Arrange
+      const args: RunTestsArgs = {
+        target: './test.ts'
+      };
+      
+      // Act
+      await handleRunTests(args);
+      
+      // Assert
+      const spawnCall = vi.mocked(spawn).mock.calls[0];
+      const options = spawnCall[2];
+      
+      // Verify timezone is set along with other required env vars
+      expect(options.env!.TZ).toBe('America/Chicago');
+      expect(options.env!.NODE_ENV).toBe('test');
+      expect(options.env!.VITEST_MCP_OPTIMIZED).toBe('1');
+      expect(options.env!.VITE_CJS_IGNORE_WARNING).toBe('true');
+    });
+  });
 });

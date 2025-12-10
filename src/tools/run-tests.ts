@@ -609,7 +609,9 @@ async function executeVitest(
         NODE_ENV: 'test',
         VITEST_MCP_OPTIMIZED: '1',
         // Suppress Vite CJS deprecation warning
-        VITE_CJS_IGNORE_WARNING: 'true'
+        VITE_CJS_IGNORE_WARNING: 'true',
+        // Set timezone to America/Chicago for consistent test execution
+        TZ: 'America/Chicago'
       }
     });
 
