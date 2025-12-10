@@ -255,3 +255,86 @@ export function sanitizeFileContent(content: string): string {
     .replace(/(javascript:|data:|vbscript:|file:|ftp:)/gi, '') // Remove dangerous protocols
     .substring(0, 1024 * 1024); // Limit to 1MB
 }
+
+/**
+ * ! Security: Validates and sanitizes command-line arguments to prevent injection
+ * @param arg - Command-line argument to validate
+ * @param argName - Name of the argument for error messages
+ * @throws Error if argument contains dangerous characters
+ */
+export function validateCommandArgument(arg: string, argName: string = 'argument'): void {
+  if (!arg || typeof arg !== 'string') {
+    throw new Error(`${argName} must be a non-empty string`);
+  }
+
+  // ! Check for command injection patterns
+  const dangerousCommandPatterns = [
+    /[;&|`$()]/,           // Command separators and substitution
+    /\$\{[^}]*\}/,         // Variable expansion
+    /\$\([^)]*\)/,         // Command substitution
+    /`[^`]*`/,             // Backtick command substitution
+    /\r|\n/,               // Line breaks
+    /\0/,                  // Null bytes
+    /[<>]/,                // Redirections
+    /\.\.\//,              // Path traversal
+  ];
+
+  for (const pattern of dangerousCommandPatterns) {
+    if (pattern.test(arg)) {
+      throw new Error(`${argName} contains potentially dangerous characters: ${pattern.source}`);
+    }
+  }
+
+  // ! Prevent dangerous flags (but allow project names starting with single dash like "-my-project")
+  const dangerousFlagPatterns = [
+    /^--/,                 // Double dash flags (--eval, --inspect, etc.)
+    /^\s+-[a-z]/i,         // Single letter flags with whitespace
+  ];
+  
+  for (const pattern of dangerousFlagPatterns) {
+    if (pattern.test(arg)) {
+      throw new Error(`${argName} looks like a command flag which is not allowed: ${arg}`);
+    }
+  }
+
+  // ! Additional length check
+  if (arg.length > 256) {
+    throw new Error(`${argName} is too long (max 256 characters)`);
+  }
+}
+
+/**
+ * ! Security: Validates an array of glob patterns for coverage exclusions
+ * @param patterns - Array of glob patterns to validate
+ * @throws Error if any pattern is invalid or dangerous
+ */
+export function validateGlobPatterns(patterns: string[]): void {
+  if (!Array.isArray(patterns)) {
+    throw new Error('Patterns must be an array');
+  }
+
+  if (patterns.length > 50) {
+    throw new Error('Too many exclude patterns (max 50)');
+  }
+
+  for (const pattern of patterns) {
+    if (!pattern || typeof pattern !== 'string') {
+      throw new Error('Each pattern must be a non-empty string');
+    }
+
+    if (pattern.length > 256) {
+      throw new Error(`Pattern too long: ${pattern.substring(0, 50)}... (max 256 characters)`);
+    }
+
+    // ! Allow only safe glob characters (including ! for negation)
+    const allowedGlobPattern = /^[\w\-/.!*]+$/;
+    if (!allowedGlobPattern.test(pattern)) {
+      throw new Error(`Invalid glob pattern: ${pattern}. Only alphanumeric, -, /, ., !, and * are allowed`);
+    }
+
+    // ! Prevent path traversal in glob patterns
+    if (pattern.includes('../') || pattern.includes('..\\')) {
+      throw new Error(`Path traversal not allowed in pattern: ${pattern}`);
+    }
+  }
+}

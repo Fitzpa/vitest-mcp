@@ -6,7 +6,9 @@ import {
   validateTestFilePath,
   validateConfigFilePath,
   createSecureTempPath,
-  sanitizeFileContent
+  sanitizeFileContent,
+  validateCommandArgument,
+  validateGlobPatterns
 } from '../path-security';
 
 // Mock fs operations
@@ -131,8 +133,96 @@ describe('path-security', () => {
     });
 
     it('should handle non-string input', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(sanitizeFileContent(null as any)).toBe('');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(sanitizeFileContent(undefined as any)).toBe('');
+    });
+  });
+
+  describe('validateCommandArgument', () => {
+    it('should accept safe project names', () => {
+      expect(() => validateCommandArgument('client', 'project')).not.toThrow();
+      expect(() => validateCommandArgument('api-server', 'project')).not.toThrow();
+      expect(() => validateCommandArgument('my_project', 'project')).not.toThrow();
+      expect(() => validateCommandArgument('-my-project', 'project')).not.toThrow(); // Allow single dash prefix
+    });
+
+    it('should reject command injection attempts with semicolons', () => {
+      expect(() => validateCommandArgument('project; rm -rf /', 'project')).toThrow('dangerous characters');
+    });
+
+    it('should reject command injection with pipes', () => {
+      expect(() => validateCommandArgument('project | cat /etc/passwd', 'project')).toThrow('dangerous characters');
+    });
+
+    it('should reject command substitution', () => {
+      expect(() => validateCommandArgument('project$(whoami)', 'project')).toThrow('dangerous characters');
+      expect(() => validateCommandArgument('project`whoami`', 'project')).toThrow('dangerous characters');
+    });
+
+    it('should reject variable expansion', () => {
+      expect(() => validateCommandArgument('project${PATH}', 'project')).toThrow('dangerous characters');
+    });
+
+    it('should reject path traversal', () => {
+      expect(() => validateCommandArgument('../etc/passwd', 'project')).toThrow('dangerous characters');
+    });
+
+    it('should reject dangerous flags', () => {
+      expect(() => validateCommandArgument('--eval=malicious', 'project')).toThrow('command flag');
+      expect(() => validateCommandArgument('--inspect', 'project')).toThrow('command flag');
+    });
+
+    it('should reject arguments that are too long', () => {
+      const longArg = 'a'.repeat(300);
+      expect(() => validateCommandArgument(longArg, 'project')).toThrow('too long');
+    });
+
+    it('should reject empty or invalid inputs', () => {
+      expect(() => validateCommandArgument('', 'project')).toThrow('must be a non-empty string');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(() => validateCommandArgument(null as any, 'project')).toThrow('must be a non-empty string');
+    });
+  });
+
+  describe('validateGlobPatterns', () => {
+    it('should accept safe glob patterns', () => {
+      expect(() => validateGlobPatterns(['**/*.test.ts', '**/node_modules/**'])).not.toThrow();
+      expect(() => validateGlobPatterns(['src/**/*.spec.js'])).not.toThrow();
+      expect(() => validateGlobPatterns(['!node_modules/**'])).not.toThrow(); // Allow negation
+    });
+
+    it('should reject non-array input', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(() => validateGlobPatterns('not-an-array' as any)).toThrow('must be an array');
+    });
+
+    it('should reject too many patterns', () => {
+      const manyPatterns = Array(60).fill('*.test.ts');
+      expect(() => validateGlobPatterns(manyPatterns)).toThrow('Too many exclude patterns');
+    });
+
+    it('should reject patterns with dangerous characters', () => {
+      expect(() => validateGlobPatterns(['pattern; rm -rf /'])).toThrow('Invalid glob pattern');
+      expect(() => validateGlobPatterns(['pattern$(whoami)'])).toThrow('Invalid glob pattern');
+    });
+
+    it('should reject path traversal in patterns', () => {
+      expect(() => validateGlobPatterns(['../../etc/passwd'])).toThrow('Path traversal not allowed');
+      // Backslashes are caught by the character validation first
+      expect(() => validateGlobPatterns(['..\\windows\\system32'])).toThrow('Invalid glob pattern');
+    });
+
+    it('should reject patterns that are too long', () => {
+      const longPattern = 'a'.repeat(300);
+      expect(() => validateGlobPatterns([longPattern])).toThrow('Pattern too long');
+    });
+
+    it('should reject empty or invalid patterns', () => {
+      expect(() => validateGlobPatterns(['', 'valid'])).toThrow('must be a non-empty string');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(() => validateGlobPatterns([null as any])).toThrow('must be a non-empty string');
     });
   });
 });
