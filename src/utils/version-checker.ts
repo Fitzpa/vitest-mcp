@@ -157,7 +157,7 @@ async function getVersionFromCli(cwd: string): Promise<string | null> {
 /**
  * Get coverage provider version
  */
-export async function getCoverageProviderVersion(projectRoot: string, provider: string = '@vitest/coverage-v8'): Promise<VersionInfo | null> {
+export async function getCoverageProviderVersion(projectRoot: string, provider: string = '@vitest/coverage-istanbul'): Promise<VersionInfo | null> {
   try {
     const packageJsonPath = resolve(projectRoot, 'node_modules', provider, 'package.json');
     const packageJson = await readFile(packageJsonPath, 'utf-8');
@@ -232,7 +232,7 @@ export async function checkAllVersions(projectRoot: string): Promise<{
   }
 
   if (!coverageVersion) {
-    warnings.push('Coverage provider (@vitest/coverage-v8) not found. Coverage analysis will not work.');
+    warnings.push('Coverage provider (@vitest/coverage-istanbul) not found. Coverage analysis will not work.');
   } else if (!coverageMeetsMinimum) {
     warnings.push(`Coverage provider version ${coverageVersion.version} is below recommended ${VERSION_REQUIREMENTS.coverageProvider.minimum}.`);
   }
@@ -252,7 +252,7 @@ export async function checkAllVersions(projectRoot: string): Promise<{
     coverageProvider: {
       version: coverageVersion,
       meetsMinimum: coverageMeetsMinimum,
-      provider: '@vitest/coverage-v8'
+      provider: '@vitest/coverage-istanbul'
     },
     warnings,
     errors

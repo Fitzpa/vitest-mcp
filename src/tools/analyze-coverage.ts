@@ -133,7 +133,7 @@ class CoverageAnalyzer {
     if (!versionCheck.coverageProvider.version) {
       if (process.env.CI !== "true") {
         console.error(
-          "Warning: Coverage provider not found. Install @vitest/coverage-v8 for coverage analysis."
+          "Warning: Coverage provider not found. Install @vitest/coverage-istanbul for coverage analysis."
         );
       }
     }

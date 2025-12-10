@@ -7,7 +7,7 @@ This MCP server provides tools for interacting with Vitest, a JavaScript/TypeScr
 ### Coverage Setup
 
 ```bash
-npm install --save-dev @vitest/coverage-v8
+npm install --save-dev @vitest/coverage-istanbul
 ```
 
 Add to vitest.config.ts:
@@ -16,7 +16,7 @@ Add to vitest.config.ts:
 export default defineConfig({
   test: {
     coverage: {
-      provider: 'v8',
+      provider: 'istanbul',
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules/', 'dist/', 'coverage/', '**/*.test.ts', '**/*.spec.ts'],
       // Configure coverage thresholds here, not via MCP server
@@ -77,7 +77,7 @@ analyze_coverage({
 
 ## Troubleshooting
 
-- "Coverage provider not found" → Install @vitest/coverage-v8
+- "Coverage provider not found" → Install @vitest/coverage-istanbul
 - "No test files found" → Check path and pattern parameters
 - "Threshold violations" → Configure thresholds in `vitest.config.ts` or add more tests
 - Timeout errors → Increase timeout parameter

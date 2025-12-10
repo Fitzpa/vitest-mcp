@@ -28,7 +28,7 @@ export default defineConfig({
     ],
     // Shared coverage configuration across all projects
     coverage: {
-      provider: 'v8',
+      provider: 'istanbul',
       reporter: ['text', 'json', 'html'],
       reportsDirectory: './coverage',
       exclude: [

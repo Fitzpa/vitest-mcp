@@ -17,7 +17,7 @@ export default defineConfig({
     // Required for coverage analysis
     coverage: {
       enabled: true,
-      provider: 'v8',
+      provider: 'istanbul',
       reporter: ['json', 'html'],
       reportsDirectory: './coverage-mcp',
       

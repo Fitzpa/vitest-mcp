@@ -154,7 +154,7 @@ The server maintains project context through `src/context/project-context.ts`:
 
 - Tests located in `src/__tests__/` and `src/tools/__tests__/`
 - Uses same Vitest configuration as projects it serves
-- Coverage configured with v8 provider and HTML reports
+- Coverage configured with istanbul provider and HTML reports
 
 ### Build Process
 
