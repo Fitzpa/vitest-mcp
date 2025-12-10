@@ -277,12 +277,23 @@ export function validateCommandArgument(arg: string, argName: string = 'argument
     /\0/,                  // Null bytes
     /[<>]/,                // Redirections
     /\.\.\//,              // Path traversal
-    /^\s*-/,               // Arguments starting with dash (potential flag injection)
   ];
 
   for (const pattern of dangerousCommandPatterns) {
     if (pattern.test(arg)) {
       throw new Error(`${argName} contains potentially dangerous characters: ${pattern.source}`);
+    }
+  }
+
+  // ! Prevent dangerous flags (but allow project names starting with single dash like "-my-project")
+  const dangerousFlagPatterns = [
+    /^--/,                 // Double dash flags (--eval, --inspect, etc.)
+    /^\s+-[a-z]/i,         // Single letter flags with whitespace
+  ];
+  
+  for (const pattern of dangerousFlagPatterns) {
+    if (pattern.test(arg)) {
+      throw new Error(`${argName} looks like a command flag which is not allowed: ${arg}`);
     }
   }
 
@@ -315,10 +326,10 @@ export function validateGlobPatterns(patterns: string[]): void {
       throw new Error(`Pattern too long: ${pattern.substring(0, 50)}... (max 256 characters)`);
     }
 
-    // ! Allow only safe glob characters
-    const allowedGlobPattern = /^[\w\-/.*]+$/;
+    // ! Allow only safe glob characters (including ! for negation)
+    const allowedGlobPattern = /^[\w\-/.!*]+$/;
     if (!allowedGlobPattern.test(pattern)) {
-      throw new Error(`Invalid glob pattern: ${pattern}. Only alphanumeric, -, /, ., and * are allowed`);
+      throw new Error(`Invalid glob pattern: ${pattern}. Only alphanumeric, -, /, ., !, and * are allowed`);
     }
 
     // ! Prevent path traversal in glob patterns

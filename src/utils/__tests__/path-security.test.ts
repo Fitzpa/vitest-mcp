@@ -145,6 +145,7 @@ describe('path-security', () => {
       expect(() => validateCommandArgument('client', 'project')).not.toThrow();
       expect(() => validateCommandArgument('api-server', 'project')).not.toThrow();
       expect(() => validateCommandArgument('my_project', 'project')).not.toThrow();
+      expect(() => validateCommandArgument('-my-project', 'project')).not.toThrow(); // Allow single dash prefix
     });
 
     it('should reject command injection attempts with semicolons', () => {
@@ -168,6 +169,11 @@ describe('path-security', () => {
       expect(() => validateCommandArgument('../etc/passwd', 'project')).toThrow('dangerous characters');
     });
 
+    it('should reject dangerous flags', () => {
+      expect(() => validateCommandArgument('--eval=malicious', 'project')).toThrow('command flag');
+      expect(() => validateCommandArgument('--inspect', 'project')).toThrow('command flag');
+    });
+
     it('should reject arguments that are too long', () => {
       const longArg = 'a'.repeat(300);
       expect(() => validateCommandArgument(longArg, 'project')).toThrow('too long');
@@ -184,6 +190,7 @@ describe('path-security', () => {
     it('should accept safe glob patterns', () => {
       expect(() => validateGlobPatterns(['**/*.test.ts', '**/node_modules/**'])).not.toThrow();
       expect(() => validateGlobPatterns(['src/**/*.spec.js'])).not.toThrow();
+      expect(() => validateGlobPatterns(['!node_modules/**'])).not.toThrow(); // Allow negation
     });
 
     it('should reject non-array input', () => {
