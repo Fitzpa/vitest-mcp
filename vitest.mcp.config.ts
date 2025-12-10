@@ -4,12 +4,29 @@ import { defineConfig } from 'vitest/config';
 // This config allows access to all tests including test-validation directory
 export default defineConfig({
   test: {
-    // Support both node and browser environments
-    environment: 'node',
-    environmentMatchGlobs: [
-      ['**/browser/**', 'jsdom']
+    // Use test.projects instead of deprecated environmentMatchGlobs
+    // This allows defining different configurations for different test environments
+    projects: [
+      {
+        test: {
+          name: 'node',
+          // Run all tests except browser tests in node environment
+          // No exclusions - MCP tools should access all tests
+          include: ['**/*.test.ts', '**/*.spec.ts'],
+          exclude: ['**/browser/**'],
+          environment: 'node',
+        }
+      },
+      {
+        test: {
+          name: 'browser',
+          // Run browser tests in jsdom environment
+          include: ['**/browser/**/*.test.ts', '**/browser/**/*.spec.ts'],
+          environment: 'jsdom',
+        }
+      }
     ],
-    // No exclusions - MCP tools should access all tests
+    // Shared coverage configuration across all projects
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
