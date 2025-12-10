@@ -779,6 +779,9 @@ async function executeCommand(
         
         // Suppress Vite CJS deprecation warning
         VITE_CJS_IGNORE_WARNING: "true",
+        
+        // Set timezone to America/Chicago for consistent test execution
+        TZ: "America/Chicago",
       },
     });
 
