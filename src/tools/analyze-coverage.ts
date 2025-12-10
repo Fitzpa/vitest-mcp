@@ -20,6 +20,7 @@ import {
   generateVersionReport,
 } from "../utils/version-checker.js";
 import { projectContext } from "../context/project-context.js";
+import { validateGlobPatterns } from "../utils/path-security.js";
 
 /**
  * Tool for analyzing test coverage with actionable insights
@@ -434,6 +435,8 @@ class CoverageAnalyzer {
   private getExcludePatterns(args: AnalyzeCoverageArgs): string[] {
     // Only use custom patterns if explicitly provided and non-empty
     if (args.exclude && args.exclude.length > 0) {
+      // ! Security: Validate exclude patterns to prevent command injection
+      validateGlobPatterns(args.exclude);
       return args.exclude;
     }
 

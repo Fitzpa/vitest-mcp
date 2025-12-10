@@ -15,6 +15,7 @@ import { projectContext } from "../context/project-context.js";
 import { findVitestConfig } from "../utils/config-finder.js";
 import { writeFileSync, readFileSync, existsSync, unlinkSync } from "fs";
 import { randomBytes } from "crypto";
+import { validateCommandArgument } from "../utils/path-security.js";
 
 /**
  * Tool for running Vitest commands safely
@@ -271,6 +272,8 @@ class TestRunner {
     const vitestArgs = ["vitest", "run", relativePath, "--reporter=json"];
 
     if (args.project) {
+      // ! Security: Validate project name to prevent command injection
+      validateCommandArgument(args.project, "project name");
       vitestArgs.push("--project", args.project);
     }
 
