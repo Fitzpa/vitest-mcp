@@ -58,6 +58,15 @@ The Vitest MCP server can be used with any MCP-compatible IDE or tool and works 
 
 > ⚠️ **Note**: The above example may not be valid for all MCP clients. Verify your client's specific setup instructions.
 
+### Running your local fork
+
+Use this when you want to exercise changes in your clone instead of the published `@djankies/vitest-mcp` package:
+
+1. Clone and install dependencies: `git clone <your-fork-url> && cd vitest-mcp && npm install`
+2. Build the server once: `npm run build` (or `npm run dev` to keep TypeScript in watch mode)
+3. Point your MCP client at the built entry: `"command": "node", "args": ["/absolute/path/to/vitest-mcp/dist/index.js"]`
+4. Start the client and verify the server registers; rerun `npm run build` after code changes if not using watch mode.
+
 ### 🛠️ Client-Specific Setup
 
 Select your preferred IDE or tool from the setup guides below:
