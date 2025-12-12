@@ -153,6 +153,51 @@ Once configured, use the MCP server naturally in your conversations:
 </details>
 
 <details>
+<summary><strong>Gemini CLI</strong></summary>
+
+### Configuration Location
+
+- **Local (Project)**: `.gemini/settings.json` in your project directory
+- **Global**: `~/.gemini/settings.json` for all workspaces
+
+### Example Configuration
+
+```json
+{
+  "mcpServers": {
+    "vitest": {
+      "transport": {
+        "type": "stdio",
+        "command": "npx",
+        "args": ["-y", "@djankies/vitest-mcp"]
+      }
+    }
+  }
+}
+```
+
+### Setup Steps
+
+1. Install Gemini CLI: `npm install -g @google/gemini-cli`
+2. Navigate to your project directory or home directory
+3. Create `.gemini/settings.json` with the configuration above
+4. Start Gemini CLI: `gemini`
+5. List available MCP servers: `/mcp list`
+6. Verify tools are available: `/mcp tools vitest`
+
+### Usage
+
+Once configured, use natural language in Gemini CLI:
+
+- "Set the project root to this directory"
+- "Run the auth component tests"
+- "Show me the test coverage gaps"
+
+You can also check MCP server connection status with `/mcp list` command.
+
+</details>
+
+<details>
 <summary><strong>VS Code</strong></summary>
 
 ### Configuration Methods
